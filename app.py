@@ -117,8 +117,8 @@ st.markdown("""
 st.markdown("---")
 st.subheader("Contact Information")
 st.markdown("""
-**Created by:** MrBubune
-**Email:** daryl.narh@gmail.com
-**Version:** 1.0.0
+**Created by:** MrBubune   
+**Discord:** mrbubune   
+**Version:** 2.0.0
 """)
 

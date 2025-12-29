@@ -205,7 +205,7 @@ with tab1:
         )
         # Ensure visual sorting follows value
         fig.update_layout(xaxis={'categoryorder':'total descending' if not lower_is_better else 'total ascending'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Table
         # Table
@@ -282,7 +282,7 @@ with tab1:
                 fig.add_hline(y=scatter_df[y_val].median(), line_dash="dash", line_color="gray", annotation_text="Median Y")
                 fig.add_vline(x=scatter_df[x_val].median(), line_dash="dash", line_color="gray", annotation_text="Median X")
                 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             # Correlation
             corr, _ = stats.pearsonr(scatter_df[x_val], scatter_df[y_val])
@@ -299,7 +299,7 @@ with tab1:
                 hover_name="Label",
                 hover_data=hover_data
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
         # Table - Show only selected stats
         cols_to_show_scatter = ["Player Name", "Season", "Position 1", "Nationality", "Age", "Minutes Played", x_val, y_val]
@@ -401,7 +401,7 @@ with tab2:
             plot_bgcolor="rgba(0,0,0,0)",
             height=600 # Bigger Radar
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Breakdown Table
         st.subheader("Stat Breakdown")
@@ -548,7 +548,7 @@ with tab3:
             ),
             title=f"Scout Report: {scout_player} (vs {', '.join(comp_pos)})"
         )
-        st.plotly_chart(fig_pizza, use_container_width=True)
+        st.plotly_chart(fig_pizza, width="stretch")
         
         # Report Card
         st.subheader("Detailed Report")
@@ -591,7 +591,7 @@ with tab3:
         
         fig_pass = px.bar(pass_df, x="Type", y=["Completed", "Attempted"], barmode="group", title="Pass Types Volume", template="plotly_dark")
         fig_pass.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-        col_p1.plotly_chart(fig_pass, use_container_width=True)
+        col_p1.plotly_chart(fig_pass, width="stretch")
         
         col_p2.dataframe(
             pass_df,
