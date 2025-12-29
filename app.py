@@ -1,9 +1,5 @@
 import streamlit as st
 import os
-import json
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
 from data_manager import DataManager
 
 st.set_page_config(
