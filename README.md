@@ -13,7 +13,7 @@ A personal Streamlit application for tracking squad details, transfers, and matc
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/retro-fifa-stats.git
+    git clone https://github.com/MrBubune/RetroFIFA-Stats-Tool-v2.git
     cd retro-fifa-stats
     ```
 
