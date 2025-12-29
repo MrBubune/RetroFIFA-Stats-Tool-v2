@@ -105,6 +105,12 @@ with tab1:
         edited_stats = st.data_editor(
             df_entry, 
             column_config={
+                "Player Name": st.column_config.TextColumn(
+                    "Player Name",
+                    width="medium",
+                    disabled=True,
+                    pinned=True
+                ),
                 "Man of the Match": st.column_config.CheckboxColumn("MOTM"),
                 "Started": st.column_config.CheckboxColumn("Started?"),
                 "Match Rating": st.column_config.NumberColumn(
