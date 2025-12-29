@@ -1,0 +1,8 @@
+*.xlsx
+token.json
+client_secrets.json
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+venv/
+.env

@@ -1,0 +1,46 @@
+I'm adding a section for stats to the retro fifa stats website using streamlit and plotly. I want to start with the following features:
+1. Stats Dashboard:
+  - It has 2 sub-menus:
+    - Overall Player performance:
+      - It would show a Bar Graph to compare single stats
+      - Slider to select number of players to show
+      - Dropdown to select stat
+      - Lower is better toggle
+      - per 90 toggle
+      - Multiple seasons toggle (This allows comparing players across seasons)
+      - Card for Table to show list of name, position, nationality, minutes, chosen stat
+    - Nulti-Stat Comparison:
+      - It would show a 2D/3D scatter plot to compare multiple stats
+      - Slider to select number of players to show
+      - Dropdown to select 2 or 3 stats
+      - Toggle for trendlines
+      - Toggle for median Lines
+      - Toggle for per 90
+      - Multiple seasons toggle (This allows comparing players across seasons)
+      - Correlation under plot
+      - Card for Table to show list of name, position, nationality, minutes, chosen stats
+      - Hover info shows name, selected stats, position, age, minutes
+2. Player Comparison:
+  - A radar chart to compare multiple players
+  - Drop down to select 2 or 3 players
+  - Option to customize colours
+  - Select category preset, the presets are:
+      - Attack (Match Rating, Goals, Shots, Shots on target, Assists, Key Passes, Dribbles, Crosses, Fouled, Penalties Conceded, Possession Lost)
+      - Midfield (Match Rating, Goals, Assists, Passes (Attempted/Completed), Dribbles (Attempted/Completed), Tackles, Interceptions, Possession Won/Lost, Key Passes, Key Dribbles)
+      - Defence (Match Rating, Goals, Own Goals, Tackles, Interceptions, Clearances, Headers, Blocks, Possession Won/Lost, Penalties Conceded)
+      - Goalkeeper (Match Rating, Saves, Shots Caught, Shots Parried, Crosses Caught, Goals Conceded, Possession Won/Lost, Balls Stripped)
+      - Possession (Passes (Attempted/Completed), Dribbles (Attempted/Completed), Key Passes, Key Dribbles, Possession Won/Lost)
+  - Filter card to allow further editing of the category preset
+  - Checkbox to display normalized values instead (Preserve original value for readability)
+  - Checkbox for per 90 stats
+  - Checkbox to enable fill colours (Lower opacity, Transparent if diabled)
+  - Stat breakdown table within card listing stats and for 2 players, higher value is green, lower value is red, and if 3 middle value is yellow
+3. Player Scout Report:
+ - A pizza chart to view stats
+ - Advanced Filter to select season
+ - Player search to select player
+ - Select 1 or more positions to compare stats with (Uses similar presets to Player Comparison)
+ - Filter stats card to configure stats in each category (Passing, Shooting, Defemding, Goalkeeping, Dribbling, etc.)
+ - Toggle to colour by category or percentile\
+ - Detailed report card to show stat, value and percentile for selected stats
+ - Pass distribution card to show percentage of passes attempted/ completed for short medium and long passes
