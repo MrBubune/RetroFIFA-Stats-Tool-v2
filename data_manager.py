@@ -127,5 +127,63 @@ class DataManager:
         else:
             self.write_data(worksheet_name, df)
 
-    def list_spreadsheets(self):
-        return []
+    def list_saves(self):
+        """List all available save files (excluding extension and suffix)."""
+        if not os.path.exists(self.data_dir):
+            return []
+        files = [f for f in os.listdir(self.data_dir) if f.endswith("_Stats.xlsx")]
+        # Remove suffix
+        return [f.replace("_Stats.xlsx", "") for f in files]
+
+    def combine_saves(self, source_names, new_name):
+        """Combine multiple saves into a new one."""
+        if not source_names or not new_name:
+            return False, "Invalid parameters"
+            
+        try:
+            target_file = f"{new_name}_Stats.xlsx"
+            target_path = os.path.join(self.data_dir, target_file)
+            
+            if os.path.exists(target_path):
+                 return False, f"Save '{new_name}' already exists."
+
+            # Initialize merged sheets
+            merged_data = {sheet: [] for sheet in self.worksheet_names}
+            
+            for save in source_names:
+                path = os.path.join(self.data_dir, f"{save}_Stats.xlsx")
+                if not os.path.exists(path):
+                    continue
+                
+                try:
+                    # Load all sheets
+                    xls = pd.read_excel(path, sheet_name=None)
+                    
+                    for sheet in self.worksheet_names:
+                        if sheet in xls:
+                            df = xls[sheet]
+                            # Add source column? Maybe not needed for now, but helpful for debugging?
+                            # df["_Source_Save"] = save
+                            merged_data[sheet].append(df)
+                        else:
+                            # Empty DF with headers
+                            merged_data[sheet].append(pd.DataFrame(columns=self.headers[sheet]))
+                except Exception as e:
+                    return False, f"Error reading {save}: {str(e)}"
+
+            # Concat and Write
+            with pd.ExcelWriter(target_path, engine='openpyxl') as writer:
+                for sheet in self.worksheet_names:
+                    if merged_data[sheet]:
+                        final_df = pd.concat(merged_data[sheet], ignore_index=True)
+                    else:
+                        final_df = pd.DataFrame(columns=self.headers[sheet])
+                    
+                    # Deduplicate? Maybe. For now, strict append.
+                    final_df.to_excel(writer, sheet_name=sheet, index=False)
+            
+            return True, f"Successfully created merged save: {new_name}"
+            
+        except Exception as e:
+            return False, f"Error combining saves: {str(e)}"
+
