@@ -92,7 +92,10 @@ with tab1:
         for p in st.session_state['current_match_players']:
             row = {"Player Name": p}
             for col in STAT_COLUMNS:
-                row[col] = 0
+                if col == "Match Rating":
+                    row[col] = 0.0
+                else:
+                    row[col] = 0
             for col in BOOLEAN_COLUMNS:
                 row[col] = False
             initial_data.append(row)
@@ -104,6 +107,13 @@ with tab1:
             column_config={
                 "Man of the Match": st.column_config.CheckboxColumn("MOTM"),
                 "Started": st.column_config.CheckboxColumn("Started?"),
+                "Match Rating": st.column_config.NumberColumn(
+                    "Match Rating",
+                    min_value=0.0,
+                    max_value=10.0,
+                    step=0.1,
+                    format="%.1f"
+                ),
             },
             hide_index=True
         )
