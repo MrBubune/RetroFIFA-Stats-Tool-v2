@@ -1,17 +1,10 @@
 import pandas as pd
-import os
+import io
 
 class DataManager:
-    def __init__(self, user_email=None):
-        self.user_email = user_email
-        self.data_dir = "data"
+    def __init__(self):
+        # In-memory store: {sheet_name: df}
         self.worksheet_names = ["Squad", "Transfers", "MatchStats"]
-        
-        # Ensure data directory exists
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
-            
-        # Headers Definition
         self.headers = {
             "Squad": [
                 "Season", "Name", "Age", "Kit Number", "Position 1", "Position 2", "Position 3", "Position 4",
@@ -40,150 +33,42 @@ class DataManager:
                 "Man of the Match", "Started"
             ]
         }
+        self.data = {name: pd.DataFrame(columns=self.headers[name]) for name in self.worksheet_names}
+        self.current_save_name = "MySave"
 
-    def set_user(self, email):
-        """Set the current user email."""
-        self.user_email = email
+    def load_from_bytes(self, file_bytes):
+        """Load data from an Excel byte stream (uploaded file)."""
+        try:
+            # Load all sheets
+            xls = pd.read_excel(file_bytes, sheet_name=None)
+            for sheet in self.worksheet_names:
+                if sheet in xls:
+                    self.data[sheet] = xls[sheet]
+                else:
+                    self.data[sheet] = pd.DataFrame(columns=self.headers[sheet])
+            return True, "Data loaded successfully."
+        except Exception as e:
+            return False, f"Error loading data: {e}"
 
-    def get_excel_path(self, email=None):
-        """Public method to get Excel path."""
-        target_email = email if email else self.user_email
-        if not target_email:
-             raise Exception("User not authenticated.")
-        safe_email = target_email.replace("@", "_at_").replace(".", "_dot_")
-        return os.path.join(self.data_dir, f"{safe_email}_Stats.xlsx")
-
-    def _get_excel_path(self):
-        return self.get_excel_path()
-
-
-
-    def load_or_create_spreadsheet(self, sheet_name=None):
-        """Ensures Excel file exists for the user."""
-        if not self.user_email:
-            return 
-            
-        path = self._get_excel_path()
-        if not os.path.exists(path):
-            # Create a new Excel file with empty sheets
-            with pd.ExcelWriter(path, engine='openpyxl') as writer:
-                for name in self.worksheet_names:
-                    df = pd.DataFrame(columns=self.headers[name])
-                    df.to_excel(writer, sheet_name=name, index=False)
-        else:
-            # Check if all sheets exist, if not create them (rare case but good safety)
-            # This is hard with ExcelWriter in append mode without overwriting.
-            # Assuming file integrity for now or just reading.
-            pass
+    def save_to_bytes(self):
+        """Save current data to an Excel byte stream for download."""
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            for name, df in self.data.items():
+                df.to_excel(writer, sheet_name=name, index=False)
+        output.seek(0)
+        return output
 
     def get_data(self, worksheet_name) -> pd.DataFrame:
-        """Fetch all records from a worksheet in the Excel file."""
-        path = self._get_excel_path()
-        if not os.path.exists(path):
-             return pd.DataFrame(columns=self.headers.get(worksheet_name, []))
-        
-        try:
-            return pd.read_excel(path, sheet_name=worksheet_name)
-        except ValueError:
-            # Sheet might not exist
-            return pd.DataFrame(columns=self.headers.get(worksheet_name, []))
-        except Exception:
-            return pd.DataFrame(columns=self.headers.get(worksheet_name, []))
+        """Fetch all records from a worksheet in memory."""
+        return self.data.get(worksheet_name, pd.DataFrame(columns=self.headers.get(worksheet_name, [])))
 
     def write_data(self, worksheet_name, df: pd.DataFrame):
-        """Overwrite a specific worksheet in the Excel file."""
-        path = self._get_excel_path()
-        
-        # We need to preserve other sheets. The best way is to load all, update one, save all.
-        # Or use openpyxl to replace a sheet.
-        # Efficient approach: load all sheets into a dict of DFs, update the one, write back.
-        
-        if os.path.exists(path):
-            all_sheets = pd.read_excel(path, sheet_name=None)
-        else:
-            all_sheets = {}
-            for name in self.worksheet_names:
-                all_sheets[name] = pd.DataFrame(columns=self.headers[name])
-        
-        all_sheets[worksheet_name] = df
-        
-        with pd.ExcelWriter(path, engine='openpyxl') as writer:
-            for name, sheet_df in all_sheets.items():
-                sheet_df.to_excel(writer, sheet_name=name, index=False)
+        """Overwrite a specific worksheet in memory."""
+        self.data[worksheet_name] = df
 
     def append_data(self, worksheet_name, df: pd.DataFrame):
-        """Append rows to a specific worksheet."""
-        path = self._get_excel_path()
-        
-        if os.path.exists(path):
-            try:
-                # Read specific sheet
-                existing_df = pd.read_excel(path, sheet_name=worksheet_name)
-            except ValueError:
-                 existing_df = pd.DataFrame(columns=self.headers.get(worksheet_name, []))
-            
-            updated_df = pd.concat([existing_df, df], ignore_index=True)
-            self.write_data(worksheet_name, updated_df)
-        else:
-            self.write_data(worksheet_name, df)
-
-    def list_saves(self):
-        """List all available save files (excluding extension and suffix)."""
-        if not os.path.exists(self.data_dir):
-            return []
-        files = [f for f in os.listdir(self.data_dir) if f.endswith("_Stats.xlsx")]
-        # Remove suffix
-        return [f.replace("_Stats.xlsx", "") for f in files]
-
-    def combine_saves(self, source_names, new_name):
-        """Combine multiple saves into a new one."""
-        if not source_names or not new_name:
-            return False, "Invalid parameters"
-            
-        try:
-            target_file = f"{new_name}_Stats.xlsx"
-            target_path = os.path.join(self.data_dir, target_file)
-            
-            if os.path.exists(target_path):
-                 return False, f"Save '{new_name}' already exists."
-
-            # Initialize merged sheets
-            merged_data = {sheet: [] for sheet in self.worksheet_names}
-            
-            for save in source_names:
-                path = os.path.join(self.data_dir, f"{save}_Stats.xlsx")
-                if not os.path.exists(path):
-                    continue
-                
-                try:
-                    # Load all sheets
-                    xls = pd.read_excel(path, sheet_name=None)
-                    
-                    for sheet in self.worksheet_names:
-                        if sheet in xls:
-                            df = xls[sheet]
-                            # Add source column? Maybe not needed for now, but helpful for debugging?
-                            # df["_Source_Save"] = save
-                            merged_data[sheet].append(df)
-                        else:
-                            # Empty DF with headers
-                            merged_data[sheet].append(pd.DataFrame(columns=self.headers[sheet]))
-                except Exception as e:
-                    return False, f"Error reading {save}: {str(e)}"
-
-            # Concat and Write
-            with pd.ExcelWriter(target_path, engine='openpyxl') as writer:
-                for sheet in self.worksheet_names:
-                    if merged_data[sheet]:
-                        final_df = pd.concat(merged_data[sheet], ignore_index=True)
-                    else:
-                        final_df = pd.DataFrame(columns=self.headers[sheet])
-                    
-                    # Deduplicate? Maybe. For now, strict append.
-                    final_df.to_excel(writer, sheet_name=sheet, index=False)
-            
-            return True, f"Successfully created merged save: {new_name}"
-            
-        except Exception as e:
-            return False, f"Error combining saves: {str(e)}"
-
+        """Append rows to a specific worksheet in memory."""
+        current = self.data.get(worksheet_name, pd.DataFrame(columns=self.headers.get(worksheet_name, [])))
+        updated = pd.concat([current, df], ignore_index=True)
+        self.data[worksheet_name] = updated

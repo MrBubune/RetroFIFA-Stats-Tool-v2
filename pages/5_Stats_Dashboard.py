@@ -18,18 +18,9 @@ if 'data_manager' not in st.session_state:
 dm = st.session_state['data_manager']
 
 
-@st.cache_data(ttl=600)
-def load_data(_dm):
-    try:
-        squad = _dm.get_data("Squad")
-        match_stats = _dm.get_data("MatchStats")
-        transfers = _dm.get_data("Transfers")
-        return squad, match_stats, transfers
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-squad_df, match_stats_df, transfers_df = load_data(dm)
+squad_df = dm.get_data("Squad")
+match_stats_df = dm.get_data("MatchStats")
+transfers_df = dm.get_data("Transfers")
 
 if match_stats_df.empty:
     st.info("No match stats available to analyze.")

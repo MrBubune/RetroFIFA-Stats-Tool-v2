@@ -15,18 +15,8 @@ dm = st.session_state['data_manager']
 
 # --- Load Data ---
 # --- Load Data ---
-@st.cache_data(ttl=600)
-def load_squad_and_stats(_dm):
-    # Using _dm to avoid hashing the DataManager object
-    squad = _dm.get_data("Squad")
-    stats = _dm.get_data("MatchStats")
-    return squad, stats
-
-try:
-    squad_df, match_stats_df = load_squad_and_stats(dm)
-except Exception as e:
-    st.error(f"Error loading data: {e}")
-    st.stop()
+squad_df = dm.get_data("Squad")
+match_stats_df = dm.get_data("MatchStats")
 
 # --- Tabs for Entry vs View ---
 tab1, tab2 = st.tabs(["Enter Match Stats", "View Player Stats"])

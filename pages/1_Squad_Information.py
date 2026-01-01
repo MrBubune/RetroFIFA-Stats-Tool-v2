@@ -16,15 +16,8 @@ dm = st.session_state['data_manager']
 
 # --- Load Data ---
 # --- Load Data ---
-@st.cache_data(ttl=600)
-def load_squad_data(_dm):
-    return _dm.get_data("Squad")
-
-try:
-    squad_df = load_squad_data(dm)
-except Exception as e:
-    st.error(f"Error loading data: {e}")
-    st.stop()
+# --- Load Data ---
+squad_df = dm.get_data("Squad")
 
 # --- Add Player Form ---
 with st.expander("Add New Player"):
